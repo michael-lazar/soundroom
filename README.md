@@ -1,2 +1,2 @@
 # soundroom
-Audio playback made simple
+Audio playback made easy
