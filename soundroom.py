@@ -4,18 +4,51 @@ import time
 from include import vlc
 
 """
-Need to figure out which features libvlc is capable of
-  1. Streaming
-  2. Recording
-  3. Read audio file into samples array
-  4. Create audio file using samples
-  5. Controlling audio device
-  6. Converting to different formats
+Notable audio packages
+----------------------
 
-What I know for sure it can do
-  1. Read encoded audio (MP3, FLAC, etc)
-  2. Play audio
-  3. Read directly from url
+Pydub (ffmpeg or libav)
+  - Load file into samples
+  - Write samples to file
+  - Play samples (no controls)
+
+python-sounddevice (PortAudio)
+  - Play samples
+  - Record to samples
+  - Streaming but no controls
+
+audiolab (libsndfile)
+  - Load file into samples (limited set of files)
+  - Play samples (no controls)
+
+pysndfile (libsndfile)
+  - Low level reading and writing files (limited set)
+
+pyglet (OpenAL, AVbin)
+  - Play all types of files
+  - Media controls (pause, volume, etc.)
+  - Large install
+
+PyAudio (PortAudio)
+  - Low level playing and recording data
+
+Audiere (abandoned)
+PyMedia (abandoned)
+
+What libvlc provides
+--------------------
+
+- Simple installation
+- Read encoded audio (MP3, etc.)
+- Play directly from url / stream
+- Full, stable media controls
+
+What libvlc can't do
+--------------------
+
+- Record audio
+- Load audio as samples / export samples
+- Convert file formats
 """
 
 
