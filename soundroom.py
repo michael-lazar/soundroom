@@ -51,10 +51,21 @@ What libvlc can't do
 - Convert file formats
 """
 
+"""
+MediaType: unknown, file, directory, disc, stream, playlist
+State: NothingSpecial, Opening, Buffering, Playing, Paused, Stopped, Ended, Error
+Meta
+AudioOutputDeviceTypes
+AudioOutputChannel
+
+AudioPlayCb
+
+channels
+"""
+
 
 class Player(object):
 
-    # NothingSpecial, Opening, Buffering, Playing, Paused, Stopped, Ended, Error
     State = vlc.State
 
     def __init__(self, source):
@@ -79,14 +90,19 @@ class Player(object):
             raise ValueError('Could not play source')
 
     def pause(self):
-        self._player.set_pause(1)
+        if self._player.can_pause():
+            self._player.set_pause(1)
 
     def stop(self):
         self._player.stop()
 
     def seek(self, position):
-        i_time = int(position * 1000)
-        self._player.set_time(i_time)
+        if self._player.is_seekable():
+            i_time = int(position * 1000)
+            self._player.set_time(i_time)
+
+    def rate(self, rate):
+        self._player.set_rate(rate)
 
     def rewind(self):
         self.seek(0)
@@ -118,14 +134,16 @@ if __name__ == '__main__':
     root = os.path.abspath(os.path.dirname(__file__))
     filename = os.path.join(root, 'resources', 'jeopardy.mp3')
 
-    player = Player(filename)
+    player = Player('http://us1.internet-radio.com:11094/listen.pls')
     player.play()
-    time.sleep(2.0)
-    player.pause()
-    time.sleep(2.0)
-    player.play()
-    time.sleep(2.0)
-    player.volume = 50
-    time.sleep(2.0)
-    player.rewind()
-    time.sleep(2.0)
+    time.sleep(20.0)
+    # player.rate(2)
+    # time.sleep(10)
+    # player.pause()
+    # time.sleep(2.0)
+    # player.play()
+    # time.sleep(2.0)
+    # player.volume = 50
+    # time.sleep(2.0)
+    # player.rewind()
+    # time.sleep(2.0)
