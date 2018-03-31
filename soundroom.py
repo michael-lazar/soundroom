@@ -52,104 +52,6 @@ What libvlc can't do
 - Convert file formats
 """
 
-"""
-MediaType: unknown, file, directory, disc, stream, playlist
-State: NothingSpecial, Opening, Buffering, Playing, Paused, Stopped, Ended, Error
-Meta
-AudioOutputDeviceTypes
-AudioOutputChannel
-
-AudioPlayCb
-
-channels
-"""
-
-
-# class EventManager(_Ctype):
-#     '''Create an event manager with callback handler.
-#
-#     This class interposes the registration and handling of
-#     event notifications in order to (a) remove the need for
-#     decorating each callback functions with the decorator
-#     '@callbackmethod', (b) allow any number of positional
-#     and/or keyword arguments to the callback (in addition
-#     to the Event instance) and (c) to preserve the Python
-#     objects such that the callback and argument objects
-#     remain alive (i.e. are not garbage collected) until
-#     B{after} the notification has been unregistered.
-#
-#     @note: Only a single notification can be registered
-#     for each event type in an EventManager instance.
-#
-#     '''
-#
-#     _callback_handler = None
-#     _callbacks = {}
-#
-#     def __new__(cls, ptr=_internal_guard):
-#         if ptr == _internal_guard:
-#             raise VLCException("(INTERNAL) ctypes class.\nYou should get a reference to EventManager through the MediaPlayer.event_manager() method.")
-#         return _Constructor(cls, ptr)
-#
-#     def event_attach(self, eventtype, callback, *args, **kwds):
-#         """Register an event notification.
-#
-#         @param eventtype: the desired event type to be notified about.
-#         @param callback: the function to call when the event occurs.
-#         @param args: optional positional arguments for the callback.
-#         @param kwds: optional keyword arguments for the callback.
-#         @return: 0 on success, ENOMEM on error.
-#
-#         @note: The callback function must have at least one argument,
-#         an Event instance.  Any other, optional positional and keyword
-#         arguments are in B{addition} to the first one.
-#         """
-#         if not isinstance(eventtype, EventType):
-#             raise VLCException("%s required: %r" % ('EventType', eventtype))
-#         if not hasattr(callback, '__call__'):  # callable()
-#             raise VLCException("%s required: %r" % ('callable', callback))
-#          # check that the callback expects arguments
-#         if not any(getargspec(callback)[:2]):  # list(...)
-#             raise VLCException("%s required: %r" % ('argument', callback))
-#
-#         if self._callback_handler is None:
-#             _called_from_ctypes = ctypes.CFUNCTYPE(None, ctypes.POINTER(Event), ctypes.c_void_p)
-#             @_called_from_ctypes
-#             def _callback_handler(event, k):
-#                 """(INTERNAL) handle callback call from ctypes.
-#
-#                 @note: We cannot simply make this an EventManager
-#                 method since ctypes does not prepend self as the
-#                 first parameter, hence this closure.
-#                 """
-#                 try: # retrieve Python callback and arguments
-#                     call, args, kwds = self._callbacks[k]
-#                      # deref event.contents to simplify callback code
-#                     call(event.contents, *args, **kwds)
-#                 except KeyError:  # detached?
-#                     pass
-#             self._callback_handler = _callback_handler
-#             self._callbacks = {}
-#
-#         k = eventtype.value
-#         r = libvlc_event_attach(self, k, self._callback_handler, k)
-#         if not r:
-#             self._callbacks[k] = (callback, args, kwds)
-#         return r
-#
-#     def event_detach(self, eventtype):
-#         """Unregister an event notification.
-#
-#         @param eventtype: the event type notification to be removed.
-#         """
-#         if not isinstance(eventtype, EventType):
-#             raise VLCException("%s required: %r" % ('EventType', eventtype))
-#
-#         k = eventtype.value
-#         if k in self._callbacks:
-#             del self._callbacks[k] # remove, regardless of libvlc return value
-#             libvlc_event_detach(self, k, self._callback_handler, k)
-
 
 class Player(object):
 
@@ -168,13 +70,13 @@ class Player(object):
 
         self._instance = vlc.Instance()
 
-        self._pointer = c_void_p()
-
+        self._pointer = vlc.Log_ptr()
         @vlc.CallbackDecorators.LogCb
-        def cb(*args, **kwargs):
-            return self._pointer
+        def cb(data, level, ctx, fmt, args):
+            print(data, level, ctx, fmt, args)
 
-        self._instance.log_set(cb, self._pointer)
+        self._cb = cb
+        self._instance.log_set(self._cb, self._pointer)
 
         self._media = self._instance.media_new(source)
         self._player = self._instance.media_player_new()
